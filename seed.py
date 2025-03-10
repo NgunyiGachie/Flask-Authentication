@@ -37,7 +37,7 @@ with app.app_context():
             username=username,
             email=email,
             password_hash=faker.password(),
-            role_id=role.id
+            role_id=rc(roles).id
         )
         users.append(user)
 
