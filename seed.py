@@ -14,9 +14,13 @@ with app.app_context():
     fake = Faker()
 
     print("Creating roles....")
-    roles = ['Admin', "Editor", "User"]
-    role_objects = [Role(name=role) for role in roles]
-    db.session.add_all(role_objects)
+    roles_data = [
+        {"name": "Admin", "permissions": "create, read, update, delete"},
+        {"name": "Editor", "permissions": "create, read, update"},
+        {"name": "User", "permissions": "read"}
+    ]
+    roles = [Role(name=data["name"], permissions=data["permissions"]) for data in roles_data]
+    db.session.add_all(roles)
     db.session.commit()
 
     print("Creating users....")
@@ -27,7 +31,7 @@ with app.app_context():
     for _ in range(25):
         username = faker.unique.first_name()
         email = faker.unique.email()
-        role = rc(role_objects)
+        role = rc(roles).id
 
         user = User(
             username=username,
