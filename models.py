@@ -15,7 +15,9 @@ class User(db.Model, SerializerMixin):
     username = db.Column(db.String, unique=True)
     email = db.Column(db.String, unique=True)
     password_hash = db.Column(db.String, unique=True)
-    role = db.Column(db.String, unique=False)
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+
+    role = db.relationship('Role', backref='users')
 
     def __repr__(self):
         return f'User {self.id}'
@@ -28,6 +30,9 @@ class Post(db.Model, SerializerMixin):
     content = db.Column(db.String, unique=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+
+    author = db.relationship('User', backref='posts')
 
     def __repr__(self):
         return f'Post {self.id} by {self.author}'
