@@ -1,6 +1,7 @@
 from flask import Flask, make_response, jsonify, request, session
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
+from flask_jwt_extended import JWTManager
 from models import db, User, Post, Role
 
 app = Flask(__name__)
@@ -10,6 +11,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.json.compact = False
 
 migrate = Migrate(app, db)
+jwt = JWTManager(app)
 db.init_app(app)
 
 class Login(Resource):
