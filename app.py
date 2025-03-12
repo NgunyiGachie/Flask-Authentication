@@ -2,6 +2,7 @@ from flask import Flask, make_response, jsonify, request, session
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
+from sqlalchemy.exc import SQLAlchemyError
 from flask_jwt_extended import (JWTManager, create_access_token, create_refresh_token, jwt_required, get_jwt_identity)
 from models import db, User, Post, Role
 
@@ -15,6 +16,16 @@ bcrypt = Bcrypt(app)
 migrate = Migrate(app, db)
 jwt = JWTManager(app)
 db.init_app(app)
+
+class User(Resource):
+
+    def get(self):
+        try:
+            users = User.query.all()
+            return jsonify([user.to_dict() for user in users])
+        except SQLAlchemyError as e:
+            print(f"An error occurred: {e}")
+            return {"message": "Internal server error"}, 500
 
 class Register(Resource):
 
