@@ -80,5 +80,11 @@ class Logout(Resource):
         session['user_id'] = None
         return {'message': '204: No content'}, 204
 
+class PostResource(Resource):
+
+    def get(self):
+        posts = Post.query.all()
+        return jsonify([post.to_dict() for post in posts])
+
 if __name__ == "__main__":
     app.run(debug=True)

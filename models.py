@@ -1,10 +1,12 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
 from sqlalchemy_serializer import SerializerMixin
+from flask_security import UserMixin, RoleMixin
 
 metadata = MetaData(naming_convention={
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
 })
+
 
 db = SQLAlchemy(metadata=metadata)
 
@@ -37,7 +39,7 @@ class Post(db.Model, SerializerMixin):
     def __repr__(self):
         return f'Post {self.id} by {self.author}'
 
-class Role(db.Model, SerializerMixin):
+class Role(db.Model, SerializerMixin, RoleMixin):
     __tablename__ = 'roles'
 
     id = db.Column(db.Integer, primary_key=True)
