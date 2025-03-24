@@ -14,10 +14,10 @@ class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String, unique=True)
-    email = db.Column(db.String, unique=True)
-    password_hash = db.Column(db.String, unique=True)
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+    username = db.Column(db.String, unique=True, nullable=False)
+    email = db.Column(db.String, unique=True, nullable=False)
+    password_hash = db.Column(db.String, nullable=False)
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
 
     role = db.relationship('Role', backref='users')
 
@@ -28,16 +28,16 @@ class Post(db.Model, SerializerMixin):
     __tablename__ = 'posts'
 
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String, unique=True)
-    content = db.Column(db.String, unique=False)
+    title = db.Column(db.String, unique=True, nullable=False)
+    content = db.Column(db.String, nullable=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
-    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
 
     author = db.relationship('User', backref='posts')
 
     def __repr__(self):
-        return f'Post {self.id} by {self.author}'
+        return f'Post {self.id} by {self.author.username}'
 
 class Role(db.Model, SerializerMixin, RoleMixin):
     __tablename__ = 'roles'
