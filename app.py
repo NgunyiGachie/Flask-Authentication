@@ -72,6 +72,7 @@ class Profile(Resource):
         return {"id": user.id, "username": user.username, "email": user.email}, 200
 
     @jwt_required()
+    @require_role("admin")
     def patch(self):
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
@@ -97,6 +98,22 @@ class PostResource(Resource):
     def get(self):
         posts = Post.query.all()
         return jsonify([post.to_dict() for post in posts])
+
+    @jwt_required()
+    def post(self):
+        user_id = get_jwt_identity()
+        user = User.query.get(user_id)
+
+        if not user or not user.has_permission("write"):
+            return jsonify({"message": "You do not have permission to create posts"}), 403
+        data = request.get_json()
+        new_post = Post(
+            title=data["title"],
+            content=data["content"],
+            author_id=user.id
+        )
+        db.session.add(new_post)
+        return jsonify({"message": "Post created successfully"}), 201
 
 if __name__ == "__main__":
     app.run(debug=True)
