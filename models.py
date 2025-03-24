@@ -10,6 +10,10 @@ metadata = MetaData(naming_convention={
 
 db = SQLAlchemy(metadata=metadata)
 
+role_users = db.Table('roles_users',
+        db.Column('user_id', db.Integer(), db.ForeignKey('users.id')),
+        db.Column('role_id', db.Integer(), db.ForeignKey('roles.id')))
+
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
 
@@ -19,7 +23,7 @@ class User(db.Model, SerializerMixin):
     password_hash = db.Column(db.String, nullable=False)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
 
-    role = db.relationship('Role', backref='users')
+    role = db.relationship('Role', secondary=role_users, backref='users')
 
     def __repr__(self):
         return f'User {self.id}'
@@ -43,8 +47,8 @@ class Role(db.Model, SerializerMixin, RoleMixin):
     __tablename__ = 'roles'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, unique=False)
-    permissions = db.Column(db.String)
+    name = db.Column(db.String, unique=False, nullable=False)
+    permissions = db.Column(db.String, nullable=True)
 
     def __repr__(self):
-        return f'Role {self.id}'
+        return f'Role {self.name}'
