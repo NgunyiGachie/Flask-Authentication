@@ -1,3 +1,4 @@
+from functools import wraps
 from flask import Flask, make_response, jsonify, request, session
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
@@ -17,6 +18,17 @@ migrate = Migrate(app, db)
 jwt = JWTManager(app)
 db.init_app(app)
 
+def require_role(role_name):
+    def decorator(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            user_id = get_jwt_identity()
+            user = User.query.get(user_id)
+            if not user or not user.has_role(role_name):
+                return jsonify({"message": "Access denied. Insufficient permissions"}), 403
+            return fn(*args, **kwargs)
+        return wrapper
+    return decorator
 
 class Register(Resource):
 
