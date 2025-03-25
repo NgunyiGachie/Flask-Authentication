@@ -145,8 +145,14 @@ class PostByID(Resource):
             db.session.commit()
             return make_response(jsonify(record.to_dict()), 200)
 
-    def delete(self):
-        pass
+    @jwt_required()
+    def delete(self, post_id):
+        record = Post.query.filter_by(id=post_id).first()
+        if not record:
+            return make_response(jsonify({"error": "Post not found"}), 404)
+        db.session.delete(record)
+        db.session.commit()
+        return make_response({"message": "Post successfully deleted"}, 200)
 
 if __name__ == "__main__":
     app.run(debug=True)
