@@ -1,4 +1,5 @@
 from functools import wraps
+from datetime import datetime
 from flask import Flask, make_response, jsonify, request, session
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
@@ -114,6 +115,38 @@ class PostResource(Resource):
         )
         db.session.add(new_post)
         return jsonify({"message": "Post created successfully"}), 201
+
+class PostByID(Resource):
+
+    def get(self, post_id):
+        post = Post.query.filter_by(id=post_id).first()
+        if post:
+            return make_response(post.to_dict(), 200)
+        return make_response(jsonify({"error": "Post not found"}), 404)
+
+    @jwt_required()
+    def patch(self, post_id):
+        user_id = get_jwt_identity()
+        user = User.query.get(user_id)
+
+        if not user or not user.has_permission("write"):
+            return jsonify({"message": "You do not have permission to edit posts"}), 403
+        record = Post.query.filter_by(id=post_id).first()
+        if not record:
+            return make_response(jsonify({"error": "Post not found"}), 404)
+        data = request.get_json()
+        for attr, value in data.items():
+            if attr == 'created_at' and value:
+                value = datetime.fromisoformat(value)
+                return make_response(jsonify({"error": "Invalid date format"}), 400)
+            if hasattr(record, attr):
+                setattr(record, attr, value)
+            db.session.add(record)
+            db.session.commit()
+            return make_response(jsonify(record.to_dict()), 200)
+
+    def delete(self):
+        pass
 
 if __name__ == "__main__":
     app.run(debug=True)
